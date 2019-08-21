@@ -1,0 +1,12 @@
+# UNREAL GENERATED FILES
+########################
+*/Binaries
+*/Build
+*/DerivedDataCache
+*/Intermediate
+*/Saved
+Content/StarterContent
+*.db
+Binaries
+Intermediate
+Saved
