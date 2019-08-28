@@ -16,14 +16,13 @@ UOpenDoor::UOpenDoor()
 void UOpenDoor::BeginPlay()
 {
     Super::BeginPlay();
+    Owner = GetOwner();
     ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
 }
 
 void UOpenDoor::OpenDoor()
 {
-    AActor* Owner = GetOwner(); // Finds the owning Actor
-    FRotator NewRotation = FRotator(0.0f, 60.0f, 0.0f); // This rotates the door in 60°
-    Owner->SetActorRotation(NewRotation); // Sets the door rotation
+    Owner->SetActorRotation(FRotator(0.0f, OpenAngle, 0.0f));
 }
 
 // Called every frame
@@ -31,8 +30,18 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	// Poll the Trigger Volume and if the Actor is in the volume open the door
-    if(PressurePlate->IsOverlappingActor(ActorThatOpens)){
+    if(PressurePlate->IsOverlappingActor(ActorThatOpens))
+    {
         OpenDoor();
+        LastDoorOpenTime = GetWorld()->GetTimeSeconds(); // Return the time in seconds since the world was brought up to play
     }
+    if(GetWorld()->GetTimeSeconds() - LastDoorOpenTime > DoorCloseDelay){
+        CloseDoor();
+    }
+    
 }
 
+void UOpenDoor::CloseDoor()
+{
+    Owner->SetActorRotation(FRotator(0.0f, 0.0f, 0.0f)); // Sets the door rotation
+}
