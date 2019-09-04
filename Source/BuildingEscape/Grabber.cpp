@@ -10,20 +10,50 @@
 UGrabber::UGrabber()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
+    // bWantsBeginPlay = true; DEPRECATED
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
+void UGrabber::Grab(){
+    UE_LOG(LogTemp, Warning, TEXT("Grab pressed"));
+}
+
+void UGrabber::Release(){
+    UE_LOG(LogTemp, Warning, TEXT("Grab released"));
+}
 
 /// Called when the game starts
 void UGrabber::BeginPlay()
 {
-	Super::BeginPlay();
+    Super::BeginPlay();
     UE_LOG(LogTemp, Warning, TEXT("Grabber reporting for duty!"));
+    
+    /// Looks for the attached Physics Handle through a generic
+    PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+    if(PhysicsHandle)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Physics Handle found"));
+    }
+    else
+    {
+         UE_LOG(LogTemp, Error, TEXT("%s missing Physics Handle Component!"), *GetOwner()->GetName());
+    }
+    
+    /// Looks for the run time attached Input Components
+    InputComponent = GetOwner()->InputComponent;
+    if(InputComponent)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Input Components found!"));
+        // Binds the Input Axis using Grab into the address where the function is stored
+        InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
+        // Checks if the Grab Action is being released and calls Release
+        InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Release);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("%s missing Input Components!"), *GetOwner()->GetName());
+    }
 }
-
 
 /// Called every frame
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
