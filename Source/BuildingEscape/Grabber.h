@@ -24,4 +24,7 @@ private:
     UInputComponent* InputComponent = nullptr;
     void Grab();
     void Release();
+    void FindPhysicsHandleComponent();
+    void SetupInputComponent();
+    const FHitResult GetFirstPhysicsBodyInReach(); // const maybe at the end of the line
 };
