@@ -16,12 +16,23 @@ void UGrabber::Grab()
 {
     UE_LOG(LogTemp, Warning, TEXT("Grab pressed"));
     // Line traces and checks for physics body collision with any other actor
-    GetFirstPhysicsBodyInReach();
+    auto HitResult = GetFirstPhysicsBodyInReach();
+    auto ComponentToGrab = HitResult.GetComponent();
+    auto ActorHit = HitResult.GetActor();
+    if(ActorHit) // if we hit something
+    {   // attach the Physics Handle
+        PhysicsHandle->GrabComponentAtLocation(
+            ComponentToGrab, //ComponentToGrab
+            NAME_None, //grab what bone name, if any
+            ComponentToGrab->GetOwner()->GetActorLocation() //grab location
+        );
+    }
 }
 
 void UGrabber::Release()
 {
     UE_LOG(LogTemp, Warning, TEXT("Grab released"));
+    PhysicsHandle->ReleaseComponent();
 }
 
 /// Called when the game starts
@@ -67,8 +78,20 @@ void UGrabber::SetupInputComponent()
 /// Called every frame
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
+    FVector PlayerViewPointLocation;
+    FRotator PlayerViewPointRotation;
+    // Gets player viewpoint this tick
+    GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
+                                                               OUT PlayerViewPointLocation,
+                                                               OUT PlayerViewPointRotation
+                                                               );
+    
+    FVector LineTraceEnd = PlayerViewPointLocation + (PlayerViewPointRotation.Vector() * Reach);
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+    if(PhysicsHandle->GrabbedComponent) // if the Physics Handle is attached
+    {
+        PhysicsHandle->SetTargetLocation(LineTraceEnd);
+    }
 }
 
 const FHitResult UGrabber::GetFirstPhysicsBodyInReach()
@@ -101,7 +124,7 @@ const FHitResult UGrabber::GetFirstPhysicsBodyInReach()
     {
         UE_LOG(LogTemp, Warning, TEXT("Line trace hits: %s"), *(ActorHit->GetName()))
     }
-    return FHitResult();
+    return Hit;
 }
 
 /* Traces a red line to visualize the players reach with the grabber
