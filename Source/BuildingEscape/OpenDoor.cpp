@@ -1,47 +1,50 @@
 // Tomas Gonzalez-Ortega
 
-
 #include "OpenDoor.h"
+#define OUT
 
 // Sets default values for this component's properties
 UOpenDoor::UOpenDoor()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 void UOpenDoor::BeginPlay()
 {
     Super::BeginPlay();
     Owner = GetOwner();
-    ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
-}
-
-void UOpenDoor::OpenDoor()
-{
-    Owner->SetActorRotation(FRotator(0.0f, OpenAngle, 0.0f));
+    if(!PressurePlate)
+    {
+        UE_LOG(LogTemp, Error, TEXT("%s missing pressure plate"), *GetOwner()->GetName());
+    }
 }
 
 // Called every frame
 void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	// Poll the Trigger Volume and if the Actor is in the volume open the door
-    if(PressurePlate->IsOverlappingActor(ActorThatOpens))
+	// Polls the Trigger Volume
+    if(GetTotalMassOfActorsOnPlate() > TriggerMass)
     {
-        OpenDoor();
-        LastDoorOpenTime = GetWorld()->GetTimeSeconds(); // Return the time in seconds since the world was brought up to play
+        OnOpen.Broadcast();
     }
-    if(GetWorld()->GetTimeSeconds() - LastDoorOpenTime > DoorCloseDelay){
-        CloseDoor();
+    else
+    {
+        OnClose.Broadcast();
     }
-    
 }
 
-void UOpenDoor::CloseDoor()
+float UOpenDoor::GetTotalMassOfActorsOnPlate()
 {
-    Owner->SetActorRotation(FRotator(0.0f, 0.0f, 0.0f)); // Sets the door rotation
+    float TotalMass = 0.f;
+    TArray<AActor*> OverlappingActors;
+    // Finds the overlapping actors
+    if(!PressurePlate){return TotalMass;}
+    PressurePlate->GetOverlappingActors(OUT OverlappingActors);
+    // Iterates through them and adds their masses
+    for (const auto* Actor : OverlappingActors)
+    {
+        TotalMass += Actor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
+    }
+    return TotalMass;
 }

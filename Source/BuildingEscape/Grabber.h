@@ -1,12 +1,10 @@
 // Tomas Gonzalez-Ortega
 
 #pragma once
-
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "Grabber.generated.h"
-
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BUILDINGESCAPE_API UGrabber : public UActorComponent
@@ -27,4 +25,6 @@ private:
     void FindPhysicsHandleComponent();
     void SetupInputComponent();
     const FHitResult GetFirstPhysicsBodyInReach(); // const maybe at the end of the line
+    FVector GetReachLineStart();
+    FVector GetReachLineEnd();
 };
