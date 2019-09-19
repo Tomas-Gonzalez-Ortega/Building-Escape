@@ -1,5 +1,5 @@
 /*
- BUILDING SCAPE by Tomas Gonzalez-Ortega
+ BUILDING ESCAPE by Tomas Gonzalez-Ortega
  Vancouver, BC, September 2019
  Demo based on Udemy - https://www.udemy.com/unrealcourse
  Unreal Engine C++ Developer: Learn C++ and Make Video Games by Ben Tristem
